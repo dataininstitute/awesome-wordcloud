@@ -2,32 +2,18 @@ from PIL import Image
 import streamlit as st
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 import stylecloud
-import twcloud
-import twint
-import re
+
+
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
-st.sidebar.image("image.gif",use_column_width=True)
-#st.image("image.gif",use_column_width=True)
-
-def clean_tweet(tweet):
-    """
-    Cleans the tweet text of URLs, user tags, hashtags, pictures,
-    and smart punctuation.
-
-    Whitespace does not need to be normalized since it is ignored
-    anyways when generating the stylecloud.
-    """
-
-    pattern = r'http\S+|pic.\S+|@[a-zA-Z0-9_]+|#[a-zA-Z0-9_]+|[‘’“”’–—…]|\xa0'
-    return re.sub(pattern, '', tweet)
+st.sidebar.image("image.png",use_column_width=True)
 
 # fonction pour definir le wordcloud
-def cloud( text, max_word, max_font, random,colormap,background_color,gradient_direction,icon,size2,invert_mask,gradient,font,origin,search,limit,color_collection):
+def cloud( text, max_word, max_font, random,colormap,background_color,gradient_direction,icon,size2,invert_mask,gradient,font):
     stopwords = set(STOPWORDS)
-    stopwords.update(['us', 'one', 'will', 'said', 'now', 'well', 'man', 'may',"c'est",
+    stopwords.update(['us', 'one', 'will', 'said', 'now', 'well', 'man', 'may',
     'little', 'say', 'must', 'way', 'long', 'yet', 'mean',
     'put', 'seem', 'asked', 'made', 'half', 'much',
     'certainly', 'might', 'came',"a","à","â","abord",
@@ -78,157 +64,59 @@ def cloud( text, max_word, max_font, random,colormap,background_color,gradient_d
     #gradient = None
     font = font+".ttf"
     
-    palette = 'cartocolors.{}.{}'.format(color_collection,colormap)
+    palette = 'cartocolors.qualitative.{}'.format(colormap)
     
     
     
     if invert_mask == "Yes":
         inv_mask = True
+    if gradient_direction is not None:
+        gradient = gradient_direction
+
         
-    if origin=="text":   
+        stylecloud.gen_stylecloud(text=text,
+                          custom_stopwords=stopwords,
+        background_color=background_color,
+        random_state=random,
+        max_words=max_word,
+        max_font_size = max_font,
+        palette = palette,
+        gradient= gradient,
+        invert_mask = inv_mask,
+        font_path = font,
+       # size= size,
+        icon_name = 'fas fa-{}'.format(icon))
         
-        if gradient_direction is not None:
-            gradient = gradient_direction
+    elif  gradient_direction is None:
+        if size2 == 'square':
+            size = (512,512)
+        if size2 == 'rectangle':
+            size = (1024,512)
     
-            
-            stylecloud.gen_stylecloud(text=text,
-                              custom_stopwords=stopwords,
-            background_color=background_color,
-            random_state=random,
-            max_words=max_word,
-            max_font_size = max_font,
-            palette = palette,
-            gradient= gradient,
-            invert_mask = inv_mask,
-            font_path = font,
-           # size= size,
-            icon_name = 'fas fa-{}'.format(icon))
-            
-        elif  gradient_direction is None:
-            if size2 == 'square':
-                size = (512,512)
-            if size2 == 'rectangle':
-                size = (1024,512)
-        
-        # generate the style cloud
-            stylecloud.gen_stylecloud(text=text,
-                              custom_stopwords=stopwords,
-            background_color=background_color,
-            random_state=random,
-            max_words=max_word,
-            max_font_size = max_font,
-            palette = palette,
-            size= size,
-            font_path = font,
-            invert_mask = inv_mask,
-            icon_name = 'fas fa-{}'.format(icon))
-        
+    # generate the style cloud
+        stylecloud.gen_stylecloud(text=text,
+                          custom_stopwords=stopwords,
+        background_color=background_color,
+        random_state=random,
+        max_words=max_word,
+        max_font_size = max_font,
+        palette = palette,
+        size= size,
+        font_path = font,
+        invert_mask = inv_mask,
+        icon_name = 'fas fa-{}'.format(icon))
     
-        #showing image
-        st.image('stylecloud.png')
-        
-    #for tweets    
+
     
-    if origin=="tweet":
-        if search == "user":
- 
-            # cleaning the tweet list
-            twint.output.tweets_list=[]
-         
-            if gradient_direction is not None:
-                gradient = gradient_direction
-        
-                
-                twcloud.gen_twcloud(username=text,
-                                  custom_stopwords=stopwords,
-                background_color=background_color,
-                random_state=random,
-                max_words=max_word,
-                max_font_size = max_font,
-                palette = palette,
-                gradient= gradient,
-                invert_mask = inv_mask,
-                font_path = font,
-                limit = limit,
-                icon_name = 'fas fa-{}'.format(icon))
-                
-            elif  gradient_direction is None:
-                if size2 == 'square':
-                    size = (512,512)
-                if size2 == 'rectangle':
-                    size = (1024,512)
-            
-            # generate the style cloud
-                twcloud.gen_twcloud(username=text,
-                                  custom_stopwords=stopwords,
-                                    background_color=background_color,
-                                    random_state=random,
-                                    max_words=max_word,
-                                    max_font_size = max_font,
-                                    palette = palette,
-                                    size= size,
-                                    font_path = font,
-                                    limit = limit,
-                                    invert_mask = inv_mask,
-                                    icon_name = 'fas fa-{}'.format(icon))
-            #st.write(twint.output.tweets_list.values)
-           # st.dataframe(twint.output.tweets_list)
-            st.image('twcloud.png')
+    st.image('stylecloud.png')
+    
    
-        if search == "search":
- 
-            # cleaning the tweet list
-            twint.output.tweets_list=[]
-         
-            if gradient_direction is not None:
-                gradient = gradient_direction
-        
-                
-                twcloud.gen_twcloud(search=text,
-                                  custom_stopwords=stopwords,
-                background_color=background_color,
-                random_state=random,
-                max_words=max_word,
-                max_font_size = max_font,
-                palette = palette,
-                gradient= gradient,
-                invert_mask = inv_mask,
-                font_path = font,
-                limit = limit,
-               # size= size,
-                icon_name = 'fas fa-{}'.format(icon))
-                
-            elif  gradient_direction is None:
-                if size2 == 'square':
-                    size = (512,512)
-                if size2 == 'rectangle':
-                    size = (1024,512)
-            
-            # generate the style cloud
-                twcloud.gen_twcloud(search=text,
-                                  custom_stopwords=stopwords,
-                                    background_color=background_color,
-                                    random_state=random,
-                                    max_words=max_word,
-                                    max_font_size = max_font,
-                                    palette = palette,
-                                    limit = limit,
-                                    size= size,
-                                    font_path = font,
-                                    invert_mask = inv_mask,
-                                    icon_name = 'fas fa-{}'.format(icon))
-            
-            #tweets = [clean_tweet(tweet.tweet) for tweet in twint.output.tweets_list]
-            #st.dataframe(tweets)
-            st.image('twcloud.png')
-            
-            
-            
+
 
 def main():
-    
     st.write("# Generate Awesome Wordcloud !")
-    
+    st.write("[By Régis Amon](https://www.linkedin.com/in/r%C3%A9gis-amon-87669665/)")
+    st.write("[Using the Stylecloud library created by Minimaxir](https://github.com/minimaxir/stylecloud)")
     max_word = st.sidebar.slider("Max words", 200, 3000, 200)
     max_font = st.sidebar.slider("Max Font Size", 50, 350, 60)
     random = st.sidebar.slider("Random State", 30, 100, 42 )
@@ -244,31 +132,10 @@ def main():
         gradient_direction = None
         size2 = st.sidebar.selectbox("Which size",['square','rectangle'])
     
-    
-    origin = st.radio("Origin",["text","tweet"])
-    if origin == "text":
-        text = st.text_area("Copy-Paste some text here...")
-    elif origin == "tweet":
-        limit = st.slider("Limit of tweets", 60, 3000, 500,step=20)
-        search = st.radio('User or search',["user","search"])
-        if search == "user":
-
-              text = st.text_input("Enter tweet account")
-        elif search == "search":
-              text = st.text_input("Enter a search or hashtag")
-        
-    
-    
-    
+    text = st.text_area("Copy-Paste some text here...")
     font = st.sidebar.selectbox("Font",["Staatliches","ArchitectsDaughter","Roboto","PermanentMarker","Pacifico"])
     # ajout de couleur creez fonction 
-    color_collection = st.sidebar.selectbox("Color collection ?",["qualitative","diverging","sequential"])
-    if color_collection == "qualitative":
-        colormap = st.sidebar.selectbox("Palette ?",["Bold_5","Pastel_6","Safe_7","Vivid_8","Prism_6","Antique_5"])
-    if color_collection == "diverging":
-        colormap = st.sidebar.selectbox("Palette ?",["ArmyRose_5","Earth_5","Fall_5","Geyser_5","TealRose_5","Tropic_5","Temps_5"])
-    if color_collection == "sequential":
-        colormap = st.sidebar.selectbox("Palette ?",["BluGrn_5","BluYl_5","BrwnYl_5","Burg_5","BurgYl_5","DarkMint_5","Emrld_5","Magenta_5","OrYel_5","PurpOr_5","Sunset_5","SunsetDark_5","TealGrn_5","agGrnYl_5"])
+    colormap = st.sidebar.selectbox("Palette ?",["Bold_5","Pastel_6","Safe_7","Vivid_8","Prism_6","Antique_5"])
     #background_color=st.sidebar.selectbox("Background Color ?",["white","black"])
     background_color = st.sidebar.color_picker("Background color")
     icon = st.sidebar.selectbox("Icon ?",["flag","at","cloud","smile","thumbs-up","user","bolt","angle-right","angle-double-right","mask","calendar-check"
@@ -278,9 +145,6 @@ def main():
                                                "glass-martini","globe-africa","grin","grin-hearts","graduation-cap","laugh"
                                                ,"microphone","paper-plane","lock-open","percent"])
     invert_mask = st.sidebar.selectbox("Invert mask ?",["No","Yes"])
-    st.sidebar.write("[By Régis Amon](https://www.linkedin.com/in/r%C3%A9gis-amon-87669665/)")
-    st.sidebar.write("[Using the Stylecloud library created by Minimaxir](https://github.com/minimaxir/stylecloud)")
-    st.sidebar.write("[Color collection available here](https://jiffyclub.github.io/palettable/cartocolors/)")
 
 
     if text is not None:
@@ -288,7 +152,7 @@ def main():
           
        
             st.write("### Word cloud")
-            st.write(cloud(text, max_word, max_font, random,colormap,background_color,gradient_direction,icon,size2,invert_mask,gradient,font,origin,search,limit,color_collection), use_column_width=True)
+            st.write(cloud(text, max_word, max_font, random,colormap,background_color,gradient_direction,icon,size2,invert_mask,gradient,font), use_column_width=True)
             st.write("Right click on the image then choose ***Save as*** to download the Wordcloud")
             #st.balloons()
     
