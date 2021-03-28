@@ -5,5 +5,5 @@
 1. Streamlit 
 2. Wordcloud
 
-![](image.gif)
+![](awesome wordcloud demo tweet.gif)
 
